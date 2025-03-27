@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ZhengceCollectionDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.zhengce_id as zhengceId
+        ,a.yonghu_id as yonghuId
+        ,a.zhengce_collection_types as zhengceCollectionTypes
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ZhengceCollectionView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,yonghu.yonghu_uuid_number as yonghuUuidNumber
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.new_money as newMoney
+        ,yonghu.yonghu_email as yonghuEmail
+        ,zhengce.zhengce_name as zhengceName
+        ,zhengce.zhengce_uuid_number as zhengceUuidNumber
+        ,zhengce.zhengce_photo as zhengcePhoto
+        ,zhengce.zhengce_types as zhengceTypes
+        ,zhengce.zhengce_content as zhengceContent
+        ,zhengce.zhengce_delete as zhengceDelete
+
+        FROM zhengce_collection  a
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+        left JOIN zhengce zhengce ON a.zhengce_id = zhengce.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.zhengceId != null and params.zhengceId != ''">
+                and (
+                    a.zhengce_id = #{params.zhengceId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test="params.zhengceCollectionTypes != null and params.zhengceCollectionTypes != ''">
+                and a.zhengce_collection_types = #{params.zhengceCollectionTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.insertTime != null and params.insertTime != ''">
+                and a.insert_time = #{params.insertTime}
+            </if>
+
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuUuidNumber != '' and params.yonghuUuidNumber != null and params.yonghuUuidNumber != 'null' ">
+                and yonghu.yonghu_uuid_number like CONCAT('%',#{params.yonghuUuidNumber},'%')
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test="params.newMoneyStart != null ">
+                <![CDATA[  and yonghu.new_money >= #{params.newMoneyStart}   ]]>
+            </if>
+            <if test="params.newMoneyEnd != null ">
+                <![CDATA[  and yonghu.new_money <= #{params.newMoneyEnd}   ]]>
+            </if>
+            <if test="params.newMoney != null and params.newMoney != ''">
+                and a.new_money = #{params.newMoney}
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+                <!-- 判断养老政策的id不为空 -->
+            <if test=" params.zhengceIdNotNull != '' and params.zhengceIdNotNull != null and params.zhengceIdNotNull != 'null' ">
+                and a.zhengce_id IS NOT NULL
+            </if>
+            <if test=" params.zhengceName != '' and params.zhengceName != null and params.zhengceName != 'null' ">
+                and zhengce.zhengce_name like CONCAT('%',#{params.zhengceName},'%')
+            </if>
+            <if test=" params.zhengceUuidNumber != '' and params.zhengceUuidNumber != null and params.zhengceUuidNumber != 'null' ">
+                and zhengce.zhengce_uuid_number like CONCAT('%',#{params.zhengceUuidNumber},'%')
+            </if>
+            <if test="params.zhengceTypes != null  and params.zhengceTypes != ''">
+                and zhengce.zhengce_types = #{params.zhengceTypes}
+            </if>
+
+            <if test=" params.zhengceContent != '' and params.zhengceContent != null and params.zhengceContent != 'null' ">
+                and zhengce.zhengce_content like CONCAT('%',#{params.zhengceContent},'%')
+            </if>
+            <if test="params.zhengceDeleteStart != null  and params.zhengceDeleteStart != '' ">
+                <![CDATA[  and zhengce.zhengce_delete >= #{params.zhengceDeleteStart}   ]]>
+            </if>
+            <if test="params.zhengceDeleteEnd != null  and params.zhengceDeleteEnd != '' ">
+                <![CDATA[  and zhengce.zhengce_delete <= #{params.zhengceDeleteEnd}   ]]>
+            </if>
+            <if test="params.zhengceDelete != null  and params.zhengceDelete != '' ">
+                and zhengce.zhengce_delete = #{params.zhengceDelete}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(zhengce.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(zhengce.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.insertTime != null and params.insertTime != ''">
+                and a.insert_time = #{params.insertTime}
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
